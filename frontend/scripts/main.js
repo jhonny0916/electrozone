@@ -35,7 +35,7 @@ function updateUI() {
 async function register() {
   username = document.getElementById('registerUsername').value;
   if (!username) return alert('Ingresa un nombre de usuario');
-  const res = await fetch('http://localhost:3000/api/auth/register', {
+  const res = await fetch('/api/auth/register', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ username })
@@ -55,7 +55,7 @@ async function register() {
 async function login() {
   username = document.getElementById('loginUsername').value;
   if (!username) return alert('Ingresa tu nombre de usuario');
-  const res = await fetch('http://localhost:3000/api/auth/login', {
+  const res = await fetch('/api/auth/login', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ username })

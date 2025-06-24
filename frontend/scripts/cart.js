@@ -8,7 +8,7 @@ async function loadCart() {
   }
 
   try {
-    const res = await fetch(`http://localhost:3000/api/cart/${userId}`);
+    const res = await fetch(`/api/cart/${userId}`);
     const cartItems = await res.json();
 
     if (cartItems.length === 0) {
@@ -53,7 +53,7 @@ async function addToCart(productId) {
 
   try {
     // Check current cart
-    const res = await fetch(`http://localhost:3000/api/cart/${userId}`);
+    const res = await fetch(`/api/cart/${userId}`);
     const cartItems = await res.json();
 
     const existingItem = cartItems.find(item => item.article_id === productId);
@@ -62,7 +62,7 @@ async function addToCart(productId) {
       // Update quantity (add to existing)
       const newQty = existingItem.quantity + qty;
 
-      await fetch('http://localhost:3000/api/cart/update', {
+      await fetch('/api/cart/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, productId, quantity: newQty })
@@ -72,7 +72,7 @@ async function addToCart(productId) {
 
     } else {
       // Add new item
-      await fetch('http://localhost:3000/api/cart/add', {
+      await fetch('/api/cart/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, productId, quantity: qty })
@@ -96,7 +96,7 @@ async function updateCartItem(productId) {
 
 
   try {
-    await fetch('http://localhost:3000/api/cart/update', {
+    await fetch('/api/cart/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, productId, quantity: qty })
@@ -111,7 +111,7 @@ async function removeCartItem(productId) {
   if (!userId) return;
 
   try {
-    await fetch('http://localhost:3000/api/cart/update', {
+    await fetch('/api/cart/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, productId, quantity: 0 })
@@ -126,7 +126,7 @@ async function payCart() {
   if (!userId) return;
 
   try {
-    const res = await fetch('http://localhost:3000/api/cart/pay', {
+    const res = await fetch('/api/cart/pay', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId })

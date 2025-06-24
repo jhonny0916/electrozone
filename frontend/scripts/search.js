@@ -2,7 +2,7 @@ const SAS_TOKEN = "?sp=r&st=2025-06-23T16:35:37Z&se=2025-07-15T00:35:37Z&sv=2024
 
 async function searchArticles() {
   const q = document.getElementById('search').value;
-  const res = await fetch(`http://localhost:3000/api/articles/search?q=${q}`);
+  const res = await fetch(`/api/articles/search?q=${q}`);
   const articles = await res.json();
   const container = document.getElementById('articles');
   container.innerHTML = '';
@@ -25,7 +25,7 @@ async function searchArticles() {
 }
 
 async function showProductModal(id) {
-  const res = await fetch(`http://localhost:3000/api/articles/${id}`);
+  const res = await fetch(`/api/articles/${id}`);
   const a = await res.json();
   const fullImageUrl = a.image_url + SAS_TOKEN;
   const modal = document.getElementById('productModal');
