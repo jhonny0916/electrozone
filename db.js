@@ -1,3 +1,4 @@
+//trigger azure
 const mysql = require('mysql2');
 const pool = mysql.createPool({
   host: 'jhonnypoligran.mysql.database.azure.com',
