@@ -1,0 +1,82 @@
+let userId = null;
+let username = null;
+
+function openAuthModal() {
+  document.getElementById('authModal').classList.add('show');
+}
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('show');
+}
+function openCartModal() {
+  loadCart();
+  document.getElementById('cartModal').classList.add('show');
+}
+function closeCartModal() {
+  document.getElementById('cartModal').classList.remove('show');
+}
+
+function updateUI() {
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const greeting = document.getElementById('userGreeting');
+
+  if (userId) {
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    greeting.innerText = 'Hola ' + username;
+  } else {
+    loginBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    greeting.innerText = '';
+    document.getElementById('cart').innerHTML = '';
+  }
+}
+
+async function register() {
+  username = document.getElementById('registerUsername').value;
+  if (!username) return alert('Ingresa un nombre de usuario');
+  const res = await fetch('http://localhost:3000/api/auth/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ username })
+  });
+  const data = await res.json();
+  if (data.userId) {
+    userId = data.userId;
+    alert('Registrado e ingresado como ' + username);
+    closeAuthModal();
+    updateUI();
+  }
+  else{
+	  alert(data.error || 'Error al registrarse');
+  }
+}
+
+async function login() {
+  username = document.getElementById('loginUsername').value;
+  if (!username) return alert('Ingresa tu nombre de usuario');
+  const res = await fetch('http://localhost:3000/api/auth/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ username })
+  });
+  const data = await res.json();
+  if (data.userId) {
+    userId = data.userId;
+    alert('Bienvenido ' + username);
+    closeAuthModal();
+    updateUI();
+  } else {
+    alert('Usuario no encontrado');
+  }
+}
+
+function logout() {
+  userId = null;
+  username = null;
+  updateUI();
+}
+
+window.onload = () => {
+  searchArticles();
+};

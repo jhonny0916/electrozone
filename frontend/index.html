@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>E-Commerce Prototype</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>ELECTROZONE</h1>
+    <div>
+	  <span id="userGreeting" style="margin-right:15px;"></span>
+      <input type="text" id="search" oninput="searchArticles()" placeholder="Buscar productos...">
+      <button id="loginBtn" onclick="openAuthModal()">Ingresar</button>
+	  <button id="logoutBtn" onclick="logout()" style="display:none;">Salir</button>
+	   <button onclick="openCartModal()">Ver Carrito</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <h2>Productos</h2>
+    <div id="articles"></div>
+   
+  </div>
+
+  <!-- Modals -->
+  <div id="authModal" class="modal">
+  <div class="modal-content auth-modal">
+    <h2>Bienvenido</h2>
+    <div class="auth-columns">
+      <div class="auth-column">
+        <h3>Iniciar sesión</h3>
+        <input type="email" id="loginUsername" placeholder="Correo">
+        <input type="password" id="loginPassword" placeholder="Contraseña">
+        <button onclick="login()">Ingresar</button>
+      </div>
+
+      <div class="auth-separator"></div>
+
+      <div class="auth-column">
+        <h3>Registrarse</h3>
+        <input type="email" id="registerUsername" placeholder="Correo">
+        <input type="password" id="registerPassword" placeholder="Contraseña">
+        <button onclick="register()">Crear cuenta</button>
+      </div>
+    </div>
+    <button onclick="closeAuthModal()" class="close-btn">×</button>
+  </div>
+  </div>
+
+  <div id="cartModal" class="modal">
+    <div class="modal-content">
+      <h2>Carrito</h2>
+      <div id="cart"></div>
+	  <button onclick="payCart()">Pagar</button>
+      <button onclick="closeCartModal()">Cerrar</button>
+    </div>
+  </div>
+  
+  <div id="productModal" class="modal">
+    <div class="modal-content" id="productModalContent"></div>
+  </div>
+
+  <script src="scripts/main.js"></script>
+  <script src="scripts/search.js"></script>
+  <script src="scripts/cart.js"></script>
+</body>
+</html>
