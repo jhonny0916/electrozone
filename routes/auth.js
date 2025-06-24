@@ -19,6 +19,7 @@ router.post('/register', async (req, res) => {
   
 });
 
+//login controller
 router.post('/login', async (req, res) => {
   const { username } = req.body;
 
