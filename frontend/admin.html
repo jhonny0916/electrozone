@@ -2,131 +2,82 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Gestión de Stock</title>
+  <title>Admin — ELECTROZONE</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .admin-container {
-      padding: 20px 30px;
+    .admin-login-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 70vh;
     }
-    .admin-container h2 {
-      margin-bottom: 10px;
-    }
-    .stock-table {
-      width: 100%;
-      border-collapse: collapse;
+    .login-card {
       background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 40px 50px;
+      width: 340px;
+      text-align: center;
+    }
+    .login-card h2 {
+      margin-bottom: 24px;
+      color: #333;
+    }
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 14px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    .login-card button {
+      width: 100%;
+      padding: 11px;
+      font-size: 15px;
+      border-radius: 6px;
+    }
+    #loginError {
+      color: #dc3545;
+      font-size: 13px;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+    .dashboard {
+      display: none;
+      padding: 30px;
+    }
+    .dashboard h2 {
       margin-bottom: 20px;
     }
-    .stock-table th, .stock-table td {
-      padding: 12px 16px;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-    }
-    .stock-table th {
-      background-color: #3483FA;
-      color: white;
-    }
-    .stock-table tr:last-child td {
-      border-bottom: none;
-    }
-    .stock-table input[type="number"] {
-      width: 80px;
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .action-buttons {
+    .dashboard-cards {
       display: flex;
-      gap: 12px;
-      margin-bottom: 30px;
+      gap: 20px;
+      flex-wrap: wrap;
     }
-    .btn-add {
-      background-color: #28a745;
-    }
-    .btn-add:hover {
-      background-color: #1e7e34;
-    }
-    .btn-decrease {
-      background-color: #dc3545;
-    }
-    .btn-decrease:hover {
-      background-color: #bd2130;
-    }
-    .history-section {
-      margin-top: 30px;
-    }
-    .history-entry {
+    .dashboard-card {
       background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 15px;
-      overflow: hidden;
-    }
-    .history-entry-header {
-      padding: 10px 16px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .history-entry-header.add {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    .history-entry-header.decrease {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    .history-entry table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .history-entry table th, .history-entry table td {
-      padding: 8px 16px;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-    }
-    .history-entry table th {
-      background-color: #f5f5f5;
-      color: #555;
-    }
-    .history-entry table tr:last-child td {
-      border-bottom: none;
-    }
-    #statusMsg {
-      margin-bottom: 15px;
-      padding: 10px 16px;
-      border-radius: 6px;
-      display: none;
-      font-weight: bold;
-    }
-    #statusMsg.success {
-      background-color: #d4edda;
-      color: #155724;
-      display: block;
-    }
-    #statusMsg.error {
-      background-color: #f8d7da;
-      color: #721c24;
-      display: block;
-    }
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
       border-radius: 12px;
-      font-size: 13px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+      text-decoration: none;
+      color: #333;
+      min-width: 180px;
     }
-    .badge.add {
-      background-color: #28a745;
-      color: white;
+    .dashboard-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
     }
-    .badge.decrease {
-      background-color: #dc3545;
-      color: white;
+    .dashboard-card .card-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    .dashboard-card h3 {
+      margin: 0;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -137,170 +88,73 @@
       <a href="/" style="color:#333; text-decoration:none;">
         <button style="background-color:#555;">← Tienda</button>
       </a>
+      <button id="logoutBtn" onclick="adminLogout()" style="display:none; background-color:#dc3545; margin-left:8px;">Salir</button>
     </div>
   </header>
 
-  <div class="admin-container">
-    <h2>Gestión de Stock</h2>
-    <p>Especifica las unidades a agregar o disminuir para cada producto y luego presiona el botón correspondiente.</p>
-
-    <div id="statusMsg"></div>
-
-    <div class="action-buttons">
-      <button class="btn-add" onclick="applyStock('add')">➕ Agregar Stock</button>
-      <button class="btn-decrease" onclick="applyStock('decrease')">➖ Disminuir Stock</button>
+  <div class="admin-login-wrapper" id="loginSection">
+    <div class="login-card">
+      <h2>🔐 Acceso Admin</h2>
+      <input type="password" id="adminPassword" placeholder="Contraseña de administrador" onkeydown="if(event.key==='Enter') adminLogin()">
+      <button onclick="adminLogin()">Ingresar</button>
+      <div id="loginError"></div>
     </div>
+  </div>
 
-    <table class="stock-table">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Stock Actual</th>
-          <th>Unidades</th>
-        </tr>
-      </thead>
-      <tbody id="productsTableBody">
-        <tr><td colspan="3">Cargando productos...</td></tr>
-      </tbody>
-    </table>
-
-    <div class="history-section">
-      <h2>Historial de Actualizaciones</h2>
-      <div id="historyContainer">
-        <p>Cargando historial...</p>
-      </div>
+  <div class="dashboard" id="dashboardSection">
+    <h2>Panel de Administración</h2>
+    <div class="dashboard-cards">
+      <a href="admin-stock.html" class="dashboard-card">
+        <div class="card-icon">📦</div>
+        <h3>Gestión de Stock</h3>
+      </a>
     </div>
   </div>
 
   <script>
-    let products = [];
-
-    async function loadProducts() {
-      try {
-        const res = await fetch('/api/admin/products');
-        products = await res.json();
-        renderProducts();
-      } catch (e) {
-        document.getElementById('productsTableBody').innerHTML =
-          '<tr><td colspan="3">Error al cargar productos.</td></tr>';
-      }
+    function getToken() {
+      return sessionStorage.getItem('adminToken');
     }
 
-    function renderProducts() {
-      const tbody = document.getElementById('productsTableBody');
-      if (!products.length) {
-        tbody.innerHTML = '<tr><td colspan="3">No hay productos.</td></tr>';
-        return;
-      }
-      tbody.innerHTML = products.map(p => `
-        <tr>
-          <td>${escapeHtml(p.name)}</td>
-          <td id="stock-${p.id}">${p.stock}</td>
-          <td><input type="number" min="0" value="0" id="units-${p.id}"></td>
-        </tr>
-      `).join('');
-    }
+    function adminLogin() {
+      const password = document.getElementById('adminPassword').value;
+      const errorEl = document.getElementById('loginError');
+      errorEl.textContent = '';
+      if (!password) { errorEl.textContent = 'Ingresa la contraseña.'; return; }
 
-    async function applyStock(action) {
-      const updates = products
-        .map(p => ({
-          productId: p.id,
-          units: parseInt(document.getElementById(`units-${p.id}`).value) || 0
-        }))
-        .filter(u => u.units > 0);
-
-      if (updates.length === 0) {
-        showStatus('Por favor ingresa al menos una unidad para algún producto.', 'error');
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/admin/stock', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action, updates })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          showStatus(
-            action === 'add' ? 'Stock agregado exitosamente.' : 'Stock disminuido exitosamente.',
-            'success'
-          );
-          await loadProducts();
-          await loadHistory();
+      fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          sessionStorage.setItem('adminToken', data.token);
+          showDashboard();
         } else {
-          showStatus(data.error || 'Error al actualizar el stock.', 'error');
+          errorEl.textContent = data.error || 'Contraseña incorrecta.';
         }
-      } catch (e) {
-        showStatus('Error de conexión.', 'error');
-      }
+      })
+      .catch(() => { errorEl.textContent = 'Error de conexión.'; });
     }
 
-    async function loadHistory() {
-      try {
-        const res = await fetch('/api/admin/history');
-        const history = await res.json();
-        renderHistory(history);
-      } catch (e) {
-        document.getElementById('historyContainer').innerHTML = '<p>Error al cargar el historial.</p>';
-      }
+    function adminLogout() {
+      sessionStorage.removeItem('adminToken');
+      document.getElementById('dashboardSection').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'flex';
+      document.getElementById('logoutBtn').style.display = 'none';
+      document.getElementById('adminPassword').value = '';
     }
 
-    function renderHistory(history) {
-      const container = document.getElementById('historyContainer');
-      if (!history.length) {
-        container.innerHTML = '<p>No hay acciones registradas aún.</p>';
-        return;
-      }
-      container.innerHTML = history.map(entry => {
-        const actionLabel = entry.action_type === 'add' ? 'Agregar' : 'Disminuir';
-        const date = new Date(entry.created_at).toLocaleString('es-CO');
-        const rows = entry.items.map(item => `
-          <tr>
-            <td>${escapeHtml(item.article_name)}</td>
-            <td>${item.units_changed}</td>
-            <td>${item.previous_stock}</td>
-            <td>${item.new_stock}</td>
-          </tr>
-        `).join('');
-        return `
-          <div class="history-entry">
-            <div class="history-entry-header ${entry.action_type}">
-              <span><span class="badge ${entry.action_type}">${actionLabel}</span> &nbsp; Acción #${entry.id}</span>
-              <span>${date}</span>
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Unidades</th>
-                  <th>Stock Anterior</th>
-                  <th>Stock Nuevo</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function showStatus(msg, type) {
-      const el = document.getElementById('statusMsg');
-      el.textContent = msg;
-      el.className = type;
-      setTimeout(() => { el.className = ''; el.style.display = 'none'; }, 4000);
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.appendChild(document.createTextNode(str));
-      return div.innerHTML;
+    function showDashboard() {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('dashboardSection').style.display = 'block';
+      document.getElementById('logoutBtn').style.display = 'inline-block';
     }
 
     window.onload = () => {
-      loadProducts();
-      loadHistory();
+      if (getToken()) showDashboard();
     };
   </script>
 </body>

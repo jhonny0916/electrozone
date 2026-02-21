@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
 const adminLimiter = rateLimit({
@@ -10,7 +11,39 @@ const adminLimiter = rateLimit({
   legacyHeaders: false
 });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 router.use(adminLimiter);
+
+// Session token generated at startup; resets on server restart
+const ADMIN_SESSION_TOKEN = crypto.randomBytes(32).toString('hex');
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_PASSWORD) {
+  console.warn('WARNING: ADMIN_PASSWORD environment variable is not set. Admin login will be disabled.');
+}
+
+function requireAdminAuth(req, res, next) {
+  const token = req.headers['x-admin-token'];
+  if (token && token === ADMIN_SESSION_TOKEN) return next();
+  res.status(401).json({ error: 'Unauthorized' });
+}
+
+// Admin login
+router.post('/login', loginLimiter, (req, res) => {
+  const { password } = req.body;
+  if (!password) return res.status(400).json({ error: 'Password required' });
+  if (!ADMIN_PASSWORD) return res.status(503).json({ error: 'Admin login is not configured' });
+  if (password === ADMIN_PASSWORD) {
+    res.json({ token: ADMIN_SESSION_TOKEN });
+  } else {
+    res.status(401).json({ error: 'Invalid password' });
+  }
+});
 
 // Create stock_history tables if not exists
 db.query(`
@@ -35,7 +68,7 @@ db.query(`
 `).catch(console.error);
 
 // Get all products
-router.get('/products', async (req, res) => {
+router.get('/products', requireAdminAuth, async (req, res) => {
   try {
     const [rows] = await db.query('SELECT id, name, stock, price FROM articles ORDER BY name');
     res.json(rows);
@@ -46,7 +79,7 @@ router.get('/products', async (req, res) => {
 });
 
 // Update stock for multiple products
-router.post('/stock', async (req, res) => {
+router.post('/stock', requireAdminAuth, async (req, res) => {
   const { action, updates } = req.body;
   // updates: [{ productId, units }]
   if (!action || !['add', 'decrease'].includes(action) || !Array.isArray(updates) || updates.length === 0) {
@@ -121,7 +154,7 @@ router.post('/stock', async (req, res) => {
 });
 
 // Get stock update history
-router.get('/history', async (req, res) => {
+router.get('/history', requireAdminAuth, async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT sh.id, sh.action_type, sh.created_at,
