@@ -82,10 +82,15 @@ router.post('/stock', requireAdminAuth, async (req, res) => {
         conn.release();
         return res.status(404).json({ error: `Product ${item.productId} not found` });
       }
-      if (action === 'decrease' && productMap[item.productId].stock < item.units) {
-        await conn.rollback();
-        conn.release();
-        return res.status(400).json({ error: `Insufficient stock for product with id ${item.productId}` });
+      if (action === 'decrease') {
+        const newStock = productMap[item.productId].stock - item.units;
+        if (newStock < 0) {
+          await conn.rollback();
+          conn.release();
+          return res.status(400).json({
+            error: `Cannot decrease stock: "${productMap[item.productId].name}" only has ${productMap[item.productId].stock} units in stock`
+          });
+        }
       }
     }
 
@@ -101,6 +106,14 @@ router.post('/stock', requireAdminAuth, async (req, res) => {
       const product = productMap[item.productId];
       const previousStock = product.stock;
       const newStock = action === 'add' ? previousStock + item.units : previousStock - item.units;
+
+      if (newStock < 0) {
+        await conn.rollback();
+        conn.release();
+        return res.status(400).json({
+          error: `Cannot decrease stock: "${product.name}" only has ${previousStock} units in stock`
+        });
+      }
 
       await conn.execute('UPDATE articles SET stock = ? WHERE id = ?', [newStock, item.productId]);
 
