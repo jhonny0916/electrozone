@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin — ELECTROZONE</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-login-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 70vh;
+    }
+    .login-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 40px 50px;
+      width: 340px;
+      text-align: center;
+    }
+    .login-card h2 {
+      margin-bottom: 24px;
+      color: #333;
+    }
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 14px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    .login-card button {
+      width: 100%;
+      padding: 11px;
+      font-size: 15px;
+      border-radius: 6px;
+    }
+    #loginError {
+      color: #dc3545;
+      font-size: 13px;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+    .dashboard {
+      display: none;
+      padding: 30px;
+    }
+    .dashboard h2 {
+      margin-bottom: 20px;
+    }
+    .dashboard-cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .dashboard-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+      text-decoration: none;
+      color: #333;
+      min-width: 180px;
+    }
+    .dashboard-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    }
+    .dashboard-card .card-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    .dashboard-card h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ELECTROZONE — Admin</h1>
+    <div>
+      <a href="/" style="color:#333; text-decoration:none;">
+        <button style="background-color:#555;">← Tienda</button>
+      </a>
+      <button id="logoutBtn" onclick="adminLogout()" style="display:none; background-color:#dc3545; margin-left:8px;">Salir</button>
+    </div>
+  </header>
+
+  <div class="admin-login-wrapper" id="loginSection">
+    <div class="login-card">
+      <h2>🔐 Acceso Admin</h2>
+      <input type="password" id="adminPassword" placeholder="Contraseña de administrador" onkeydown="if(event.key==='Enter') adminLogin()">
+      <button onclick="adminLogin()">Ingresar</button>
+      <div id="loginError"></div>
+    </div>
+  </div>
+
+  <div class="dashboard" id="dashboardSection">
+    <h2>Panel de Administración</h2>
+    <div class="dashboard-cards">
+      <a href="admin-stock.html" class="dashboard-card">
+        <div class="card-icon">📦</div>
+        <h3>Gestión de Stock</h3>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    function getToken() {
+      return sessionStorage.getItem('adminToken');
+    }
+
+    function adminLogin() {
+      const password = document.getElementById('adminPassword').value;
+      const errorEl = document.getElementById('loginError');
+      errorEl.textContent = '';
+      if (!password) { errorEl.textContent = 'Ingresa la contraseña.'; return; }
+
+      fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          sessionStorage.setItem('adminToken', data.token);
+          showDashboard();
+        } else {
+          errorEl.textContent = data.error || 'Contraseña incorrecta.';
+        }
+      })
+      .catch(() => { errorEl.textContent = 'Error de conexión.'; });
+    }
+
+    function adminLogout() {
+      sessionStorage.removeItem('adminToken');
+      document.getElementById('dashboardSection').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'flex';
+      document.getElementById('logoutBtn').style.display = 'none';
+      document.getElementById('adminPassword').value = '';
+    }
+
+    function showDashboard() {
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('dashboardSection').style.display = 'block';
+      document.getElementById('logoutBtn').style.display = 'inline-block';
+    }
+
+    window.onload = () => {
+      if (getToken()) showDashboard();
+    };
+  </script>
+</body>
+</html>
