@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -17,7 +19,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
 
-const port = process.env.PORT;
+const port = Number(process.env.PORT) || 3000;
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en el puerto ${port}`);

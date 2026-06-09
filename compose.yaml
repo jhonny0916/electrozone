@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: electrozone_app
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      ADMIN_PASSWORD: admin123
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: electrozone_user
+      DB_PASSWORD: electrozone_pass
+      DB_NAME: electrozone
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    container_name: electrozone_mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: electrozone
+      MYSQL_USER: electrozone_user
+      MYSQL_PASSWORD: electrozone_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
