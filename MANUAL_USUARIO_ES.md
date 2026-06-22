@@ -161,6 +161,21 @@ Nota: en la version actual, el proceso real de autenticacion usa el correo/usern
 - Se muestra el total pagado.
 4. Si no hay stock para algun item, se informa el error y no se completa la compra.
 
+## 3.8 Historial de compras
+
+1. Una vez iniciada la sesion, haz clic en el boton "Mis Compras" en la barra superior.
+2. Se abre la pagina de historial de compras.
+3. En esta pagina puedes ver:
+- La fecha de cada factura.
+- El valor total de la factura.
+4. Haz clic en "Ver detalle" para abrir una ventana emergente con el desglose por articulo.
+5. En el detalle se muestra:
+- El nombre del articulo.
+- La cantidad comprada.
+- El precio total guardado para ese articulo en la factura.
+
+Nota: este historial se construye a partir de las tablas `bills` y `bill_items`.
+
 ---
 
 ## 4. Manual de uso para administrador
@@ -222,6 +237,9 @@ Principales rutas:
 
 - `/api/cart`
 - Agregar, actualizar, listar carrito y pagar.
+
+- `/api/bills`
+- Historial de compras del usuario y detalle de cada factura.
 
 - `/api/admin`
 - Login de administrador.
