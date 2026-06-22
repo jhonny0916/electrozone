@@ -15,18 +15,29 @@ function closeCartModal() {
   document.getElementById('cartModal').classList.remove('show');
 }
 
+function openPurchaseHistory() {
+  if (!userId) {
+    alert('Debes iniciar sesion para ver tus compras.');
+    return;
+  }
+  window.location.href = '/purchases.html';
+}
+
 function updateUI() {
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const greeting = document.getElementById('userGreeting');
+  const historyBtn = document.getElementById('historyBtn');
 
   if (userId) {
     loginBtn.style.display = 'none';
     logoutBtn.style.display = 'inline-block';
+    historyBtn.style.display = 'inline-block';
     greeting.innerText = 'Hola ' + username;
   } else {
     loginBtn.style.display = 'inline-block';
     logoutBtn.style.display = 'none';
+    historyBtn.style.display = 'none';
     greeting.innerText = '';
     document.getElementById('cart').innerHTML = '';
   }
@@ -43,6 +54,8 @@ async function register() {
   const data = await res.json();
   if (data.userId) {
     userId = data.userId;
+    sessionStorage.setItem('userId', String(userId));
+    sessionStorage.setItem('username', username);
     alert('Registrado e ingresado como ' + username);
     closeAuthModal();
     updateUI();
@@ -63,6 +76,8 @@ async function login() {
   const data = await res.json();
   if (data.userId) {
     userId = data.userId;
+    sessionStorage.setItem('userId', String(userId));
+    sessionStorage.setItem('username', username);
     alert('Bienvenido ' + username);
     closeAuthModal();
     updateUI();
@@ -74,9 +89,18 @@ async function login() {
 function logout() {
   userId = null;
   username = null;
+  sessionStorage.removeItem('userId');
+  sessionStorage.removeItem('username');
   updateUI();
 }
 
 window.onload = () => {
+  const persistedUserId = Number(sessionStorage.getItem('userId') || 0);
+  const persistedUsername = sessionStorage.getItem('username') || null;
+  if (persistedUserId) {
+    userId = persistedUserId;
+    username = persistedUsername;
+    updateUI();
+  }
   searchArticles();
 };

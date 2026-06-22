@@ -28,6 +28,24 @@ CREATE TABLE IF NOT EXISTS cart (
   CONSTRAINT uq_cart_user_article_paid UNIQUE (user_id, article_id, paid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS bills (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_bills_user FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS bill_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  bill_id INT NOT NULL,
+  article_id INT NOT NULL,
+  quantity INT NOT NULL,
+  price DECIMAL(10,2) NOT NULL,
+  CONSTRAINT fk_bill_items_bill FOREIGN KEY (bill_id) REFERENCES bills(id),
+  CONSTRAINT fk_bill_items_article FOREIGN KEY (article_id) REFERENCES articles(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO articles (name, description, characteristics, price, stock, image_url, category)
 SELECT * FROM (
   SELECT 'Aire acondicionado portátil 12000 BTU', 'Enfría habitaciones medianas con bajo consumo energético y operación silenciosa.', 'Control remoto; temporizador 24 horas; modo deshumidificación; gas ecológico', 1899000.00, 12, 'aireacondicionado.jpg', 'Climatización'

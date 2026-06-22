@@ -11,4 +11,14 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-module.exports = pool.promise();
+const admin = {
+  user: process.env.ADMIN_USER || 'admin',
+  password: process.env.ADMIN_PASSWORD || 'admin',
+}
+
+const db = pool.promise();
+
+// Expose admin credentials config so auth can reuse the same env/default fallback.
+db.admin = admin;
+
+module.exports = db;

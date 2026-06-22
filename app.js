@@ -12,6 +12,7 @@ app.use(express.static(path.join(__dirname, 'frontend')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/articles', require('./routes/articles'));
 app.use('/api/cart', require('./routes/cart'));
+app.use('/api/bills', require('./routes/bills'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/admin', require('./routes/admin-stock'));
 

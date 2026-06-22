@@ -21,10 +21,10 @@ router.use(adminLimiter);
 
 // Admin login
 router.post('/login', loginLimiter, (req, res) => {
-  const { password } = req.body;
-  if (!password) return res.status(400).json({ error: 'Password required' });
+  const submittedPassword = String(req.body?.password || '').trim();
+  if (!submittedPassword) return res.status(400).json({ error: 'Password required' });
   if (!ADMIN_PASSWORD) return res.status(503).json({ error: 'Admin login is not configured' });
-  if (password === ADMIN_PASSWORD) {
+  if (submittedPassword === String(ADMIN_PASSWORD).trim()) {
     res.json({ token: ADMIN_SESSION_TOKEN });
   } else {
     res.status(401).json({ error: 'Invalid password' });

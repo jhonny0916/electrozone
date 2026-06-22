@@ -8,7 +8,8 @@ services:
       - "3000:3000"
     environment:
       PORT: 3000
-      ADMIN_PASSWORD: admin123
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
       DB_HOST: mysql
       DB_PORT: 3306
       DB_USER: electrozone_user

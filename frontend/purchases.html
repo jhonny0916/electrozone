@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Compras - ELECTROZONE</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .history-wrap {
+      max-width: 1000px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    .history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .history-head h2 {
+      margin: 0;
+    }
+
+    .history-user {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .history-table-wrap {
+      overflow-x: auto;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    .history-table th,
+    .history-table td {
+      border-bottom: 1px solid #e9e9e9;
+      padding: 12px 10px;
+      text-align: left;
+    }
+
+    .history-table th {
+      background: #fafafa;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      padding: 18px;
+      border: 1px dashed #ccc;
+      border-radius: 8px;
+      color: #666;
+      text-align: center;
+    }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .detail-table th,
+    .detail-table td {
+      border-bottom: 1px solid #ececec;
+      padding: 8px;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .detail-total {
+      margin-top: 12px;
+      text-align: right;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ELECTROZONE - Mis Compras</h1>
+    <div>
+      <a href="/"><button style="background-color:#555;">← Tienda</button></a>
+    </div>
+  </header>
+
+  <div class="history-wrap">
+    <div class="history-head">
+      <h2>Historial de compras</h2>
+      <div id="historyUser" class="history-user"></div>
+    </div>
+
+    <div id="historyContent"></div>
+  </div>
+
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <h3 id="detailTitle">Detalle de compra</h3>
+      <div id="detailBody"></div>
+      <button onclick="closeDetailModal()">Cerrar</button>
+    </div>
+  </div>
+
+  <script>
+    const userId = Number(sessionStorage.getItem('userId') || 0);
+    const username = sessionStorage.getItem('username') || '';
+
+    function formatMoney(value) {
+      return Number(value).toLocaleString('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        maximumFractionDigits: 0
+      });
+    }
+
+    function formatDate(value) {
+      const date = new Date(value);
+      return date.toLocaleString('es-CO');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('show');
+    }
+
+    async function openDetailModal(billId) {
+      const body = document.getElementById('detailBody');
+      body.innerHTML = '<p>Cargando detalle...</p>';
+      document.getElementById('detailModal').classList.add('show');
+
+      try {
+        const res = await fetch(`/api/bills/${userId}/${billId}/items`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          body.innerHTML = `<p>${data.error || 'No fue posible cargar el detalle.'}</p>`;
+          return;
+        }
+
+        const rows = data.items.map(item => `
+          <tr>
+            <td>${item.article_name}</td>
+            <td>${item.quantity}</td>
+            <td>${formatMoney(item.price)}</td>
+          </tr>
+        `).join('');
+
+        body.innerHTML = `
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>Articulo</th>
+                <th>Cantidad</th>
+                <th>Precio total</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="detail-total">Total factura: ${formatMoney(data.bill.total)}</div>
+        `;
+      } catch (error) {
+        console.error(error);
+        body.innerHTML = '<p>Error de conexion al cargar el detalle.</p>';
+      }
+    }
+
+    async function loadPurchaseHistory() {
+      const content = document.getElementById('historyContent');
+      const userLabel = document.getElementById('historyUser');
+
+      if (!userId) {
+        content.innerHTML = '<div class="empty-state">Debes iniciar sesion para ver tu historial.</div>';
+        return;
+      }
+
+      userLabel.textContent = username ? `Usuario: ${username}` : `Usuario ID: ${userId}`;
+
+      try {
+        const res = await fetch(`/api/bills/${userId}`);
+        const bills = await res.json();
+
+        if (!res.ok) {
+          content.innerHTML = `<div class="empty-state">${bills.error || 'No fue posible cargar el historial.'}</div>`;
+          return;
+        }
+
+        if (!Array.isArray(bills) || bills.length === 0) {
+          content.innerHTML = '<div class="empty-state">Todavia no tienes compras registradas.</div>';
+          return;
+        }
+
+        const rows = bills.map((bill, index) => `
+          <tr>
+            <td>#${index + 1}</td>
+            <td>${formatDate(bill.created_at)}</td>
+            <td>${formatMoney(bill.total)}</td>
+            <td><button onclick="openDetailModal(${bill.id})">Ver detalle</button></td>
+          </tr>
+        `).join('');
+
+        content.innerHTML = `
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Fecha</th>
+                  <th>Monto</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
+      } catch (error) {
+        console.error(error);
+        content.innerHTML = '<div class="empty-state">Error de conexion al cargar el historial.</div>';
+      }
+    }
+
+    window.onload = loadPurchaseHistory;
+  </script>
+</body>
+</html>

@@ -1,11 +1,13 @@
 const crypto = require('crypto');
+const db = require('../db');
 
 // Session token generated at startup; resets on server restart
 const ADMIN_SESSION_TOKEN = crypto.randomBytes(32).toString('hex');
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_USER = db.admin?.user;
+const ADMIN_PASSWORD = db.admin?.password;
 
 if (!ADMIN_PASSWORD) {
-  console.warn('WARNING: ADMIN_PASSWORD environment variable is not set. Admin login will be disabled.');
+  console.warn('WARNING: Admin credentials are not configured. Admin login will be disabled.');
 }
 
 function requireAdminAuth(req, res, next) {
@@ -14,4 +16,4 @@ function requireAdminAuth(req, res, next) {
   res.status(401).json({ error: 'Unauthorized' });
 }
 
-module.exports = { ADMIN_SESSION_TOKEN, ADMIN_PASSWORD, requireAdminAuth };
+module.exports = { ADMIN_SESSION_TOKEN, ADMIN_USER, ADMIN_PASSWORD, requireAdminAuth };
